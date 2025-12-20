@@ -1,0 +1,14 @@
+model_training.py --- use for model training with dataset(name os the dataset asl_dataset).
+prediction_training.py --- view the prediction of each letter.
+fine_turning_debugging,py --- use personal data input to improve the accuracy of the model by give me the model personal dataset.9
+venv ----- python virtual environment--- to locally install python packages
+data.pickel----data converting to binary computer understandable form
+model.p---- copy/trained model compressed like version/trained model is saved using this
+myreal---extra data pickle/extra data is added here after fine tuning
+collectfinetune---to collect user input data and converted to pickle
+image process-- dataset image to pickle
+inference--- trained model is displayed
+retrain mix--- collectfinetune pickle to dump to model/already trained model
+train_model2-- train model with dataset
+run--- predictingletters
+to add-- finetuneingdebugging
