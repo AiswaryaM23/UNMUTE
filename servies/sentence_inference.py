@@ -3,13 +3,39 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import time
+import re
+from spellchecker import SpellChecker
+
+
+# ================= NORMALIZE REPEATED LETTERS =================
+def normalize_word(word):
+    # baaaaad -> bad, hellooo -> hello
+    return re.sub(r'(.)\1{2,}', r'\1', word)
+
+
+# ================= TEXT WRAPPING =================
+def wrap_text(text, max_len):
+    words = text.split(" ")
+    lines, line = [], ""
+    for word in words:
+        if len(line) + len(word) <= max_len:
+            line += word + " "
+        else:
+            lines.append(line)
+            line = word + " "
+    lines.append(line)
+    return lines
+
 
 def main():
     # ================= LOAD MODEL =================
     model_dict = pickle.load(open('./model/model.p', 'rb'))
     model = model_dict['model']
 
-    # ================= MEDIAPIPE SETUP =================
+    # ================= AUTOCORRECT =================
+    spell = SpellChecker()
+
+    # ================= MEDIAPIPE =================
     mp_hands = mp.solutions.hands
     mp_drawing = mp.solutions.drawing_utils
     mp_styles = mp.solutions.drawing_styles
@@ -29,12 +55,13 @@ def main():
 
     last_char = None
     stable_count = 0
-    STABLE_THRESHOLD = 10  # frames
+    STABLE_THRESHOLD = 10
 
     last_hand_time = time.time()
-    SPACE_TIMEOUT = 1.2  # seconds without hand = space
+    SPACE_TIMEOUT = 1.2      # word break
+    SENTENCE_TIMEOUT = 3.0  # sentence end
 
-    print("📷 Sentence Inference Started | Press 'Q' to quit")
+    print("📷 Sentence inference with autocorrect running | Press Q to quit")
 
     while True:
         ret, frame = cap.read()
@@ -64,9 +91,7 @@ def main():
                 mp_styles.get_default_hand_connections_style()
             )
 
-            data_aux = []
-            x_ = []
-            y_ = []
+            data_aux, x_, y_ = [], [], []
 
             for lm in hand_landmarks.landmark:
                 x_.append(lm.x)
@@ -77,83 +102,66 @@ def main():
                 data_aux.append(lm.y - min(y_))
 
             try:
-                prediction = model.predict([np.asarray(data_aux)])
-                predicted_char = prediction[0]
+                predicted_char = model.predict([np.asarray(data_aux)])[0]
             except:
                 predicted_char = None
 
-        # ================= LETTER STABILITY LOGIC =================
+        # ================= LETTER STABILITY =================
         if predicted_char == last_char and predicted_char is not None:
             stable_count += 1
         else:
             stable_count = 0
 
         if stable_count == STABLE_THRESHOLD:
-            # Avoid repeated same letter spam
-            if len(current_word) == 0 or current_word[-1] != predicted_char:
-                current_word += predicted_char
+            if len(current_word) == 0 or current_word[-1] != predicted_char.lower():
+                current_word += predicted_char.lower()
             stable_count = 0
 
         last_char = predicted_char
 
-        # ================= SPACE DETECTION =================
-        if not hand_detected:
-            if time.time() - last_hand_time > SPACE_TIMEOUT:
-                if current_word != "":
-                    sentence += current_word + " "
-                    current_word = ""
-                last_hand_time = time.time()
+        # ================= WORD BREAK + AUTOCORRECT =================
+        if not hand_detected and time.time() - last_hand_time > SPACE_TIMEOUT:
+            if current_word:
+                normalized = normalize_word(current_word)
+                corrected = spell.correction(normalized)
+                sentence += (corrected if corrected else normalized) + " "
+                current_word = ""
+            last_hand_time = time.time()
 
-        # ================= UI DISPLAY =================
+        # ================= SENTENCE END + PUNCTUATION =================
+        if not hand_detected and time.time() - last_hand_time > SENTENCE_TIMEOUT:
+            if sentence and not sentence.strip().endswith(('.', '!', '?')):
+                sentence = sentence.strip() + ". "
+            last_hand_time = time.time()
+
+        # ================= UI =================
         panel_width = 450
         combined = np.zeros((H, W + panel_width, 3), dtype=np.uint8)
-
-        # Left: camera
         combined[:, :W] = frame
 
-        # Right: text panel
-        cv2.rectangle(
-            combined,
-            (W, 0),
-            (W + panel_width, H),
-            (30, 30, 30),
-            -1
-        )
+        cv2.rectangle(combined, (W, 0), (W + panel_width, H), (25, 25, 25), -1)
 
         cv2.putText(
-            combined,
-            "Sentence Output:",
+            combined, "Sentence Output:",
             (W + 20, 40),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.8,
-            (0, 255, 0),
-            2
+            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2
         )
 
         display_text = sentence + current_word
-
-        y0 = 80
-        for i, line in enumerate(wrap_text(display_text, 35)):
+        y = 80
+        for line in wrap_text(display_text, 35):
             cv2.putText(
-                combined,
-                line,
-                (W + 20, y0 + i * 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.7,
-                (255, 255, 255),
-                2
+                combined, line,
+                (W + 20, y),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2
             )
+            y += 30
 
-        # Show predicted letter
         if predicted_char:
             cv2.putText(
-                combined,
-                f"Letter: {predicted_char}",
+                combined, f"Letter: {predicted_char}",
                 (20, 40),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (0, 255, 0),
-                2
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2
             )
 
         cv2.imshow("Sign Language Sentence Detector", combined)
@@ -163,20 +171,6 @@ def main():
 
     cap.release()
     cv2.destroyAllWindows()
-
-
-def wrap_text(text, max_len):
-    words = text.split(" ")
-    lines = []
-    line = ""
-    for word in words:
-        if len(line) + len(word) <= max_len:
-            line += word + " "
-        else:
-            lines.append(line)
-            line = word + " "
-    lines.append(line)
-    return lines
 
 
 if __name__ == "__main__":
