@@ -6,12 +6,20 @@ import time
 import re
 from spellchecker import SpellChecker
 
-
 # ================= NORMALIZE REPEATED LETTERS =================
 def normalize_word(word):
     # baaaaad -> bad, hellooo -> hello
     return re.sub(r'(.)\1{2,}', r'\1', word)
 
+# ================= REMOVE DUPLICATE WORDS =================
+def clean_sentence(text):
+    words = text.split()
+    clean = []
+    for w in words:
+        if not clean or w != clean[-1]:
+            clean.append(w)
+    sentence = " ".join(clean)
+    return sentence.capitalize()
 
 # ================= TEXT WRAPPING =================
 def wrap_text(text, max_len):
@@ -26,14 +34,13 @@ def wrap_text(text, max_len):
     lines.append(line)
     return lines
 
-
 def main():
     # ================= LOAD MODEL =================
     model_dict = pickle.load(open('./model/model.p', 'rb'))
     model = model_dict['model']
 
     # ================= AUTOCORRECT =================
-    spell = SpellChecker()
+    spell = SpellChecker(distance=1)
 
     # ================= MEDIAPIPE =================
     mp_hands = mp.solutions.hands
@@ -59,7 +66,11 @@ def main():
 
     last_hand_time = time.time()
     SPACE_TIMEOUT = 1.2      # word break
-    SENTENCE_TIMEOUT = 3.0  # sentence end
+    SENTENCE_TIMEOUT = 3.0   # sentence end
+
+    last_word = None
+    last_word_time = 0
+    WORD_COOLDOWN = 1.5      # seconds
 
     print("📷 Sentence inference with autocorrect running | Press Q to quit")
 
@@ -112,14 +123,28 @@ def main():
         else:
             stable_count = 0
 
-        if stable_count == STABLE_THRESHOLD:
-            if len(current_word) == 0 or current_word[-1] != predicted_char.lower():
-                current_word += predicted_char.lower()
+        if stable_count >= STABLE_THRESHOLD:
+            now = time.time()
+            label = predicted_char.lower() if predicted_char else ""
+            # If the predicted label is a word (your fine-tuned labels)
+            if len(label) > 1:
+                if label != last_word or now - last_word_time > WORD_COOLDOWN:
+                    # Autocorrect word
+                    normalized = normalize_word(label)
+                    corrected = spell.correction(normalized)
+                    sentence += (corrected if corrected else normalized) + " "
+                    last_word = label
+                    last_word_time = now
+                    current_word = ""
+            # If single letter
+            elif label:
+                current_word += label
+
             stable_count = 0
 
         last_char = predicted_char
 
-        # ================= WORD BREAK + AUTOCORRECT =================
+        # ================= WORD BREAK =================
         if not hand_detected and time.time() - last_hand_time > SPACE_TIMEOUT:
             if current_word:
                 normalized = normalize_word(current_word)
@@ -147,7 +172,7 @@ def main():
             cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2
         )
 
-        display_text = sentence + current_word
+        display_text = clean_sentence(sentence + current_word)
         y = 80
         for line in wrap_text(display_text, 35):
             cv2.putText(
@@ -159,7 +184,7 @@ def main():
 
         if predicted_char:
             cv2.putText(
-                combined, f"Letter: {predicted_char}",
+                combined, f"Letter/Word: {predicted_char}",
                 (20, 40),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2
             )
@@ -171,7 +196,6 @@ def main():
 
     cap.release()
     cv2.destroyAllWindows()
-
 
 if __name__ == "__main__":
     main()
