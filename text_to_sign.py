@@ -99,3 +99,5 @@ def animate_items():
 Button(left_frame, text="Convert to Sign", command=update_image, font=("Arial", 12)).pack(pady=10)
 
 root.mainloop()
+
+
