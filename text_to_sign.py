@@ -2,15 +2,17 @@ import os
 from tkinter import *
 from PIL import Image, ImageTk, ImageSequence
 
-# Folder containing GIFs (letters or words)
-gif_folder = "gifs"
+# Paths
+letter_folder = "assets/images"  # JPG letters
+word_folder = "gif"              # GIF words
 
 # GUI parameters
-letter_size = 100
-max_items_per_row = 8  # letters or GIFs per row
+item_size = 100  # size of letter/GIF
+spacing = 10     # space between letters/GIFs
+canvas_width = 900
 
 root = Tk()
-root.title("Text → Sign Language (Hybrid Auto GIFs)")
+root.title("Text → Sign Language")
 root.geometry("1200x500")
 
 # Left frame for text input
@@ -21,71 +23,96 @@ Label(left_frame, text="Enter text:", font=("Arial", 14)).pack(pady=10)
 entry = Entry(left_frame, font=("Arial", 16), width=20)
 entry.pack(pady=10)
 
+Button(left_frame, text="Convert to Sign", font=("Arial", 12), command=lambda: update_image()).pack(pady=20)
+
 # Right frame for output
-right_frame = Frame(root, width=900, height=500)
+right_frame = Frame(root, width=canvas_width, height=500)
 right_frame.pack(side=RIGHT, fill=BOTH, expand=True, padx=10, pady=10)
-output_canvas = Canvas(right_frame, bg="white")
+output_canvas = Canvas(right_frame, bg="white", width=canvas_width)
 output_canvas.pack(fill=BOTH, expand=True)
 
-animated_items = []
+# References
+animated_items = []  # GIFs
+static_images = []   # JPG letters
+
+def create_item_for_word(word):
+    """Return list of items for a word (either GIF or letters)"""
+    items = []
+    word_path = os.path.join(word_folder, f"{word}.gif")
+    if os.path.exists(word_path):
+        im = Image.open(word_path)
+        frames = [ImageTk.PhotoImage(frame.resize(
+            (int(frame.width * (item_size / frame.height)), item_size),
+            Image.Resampling.LANCZOS))
+                  for frame in ImageSequence.Iterator(im)]
+        items.append(("gif", frames))
+    else:
+        for ch in word:
+            letter_path = os.path.join(letter_folder, f"{ch}.jpg")
+            if os.path.exists(letter_path):
+                im = Image.open(letter_path)
+                im = im.resize((item_size, item_size), Image.Resampling.LANCZOS)
+                photo = ImageTk.PhotoImage(im)
+                static_images.append(photo)
+                items.append(("image", photo))
+            else:
+                print(f"No image for '{ch}' found in {letter_folder}")
+    # Add space after word
+    items.append(("space", None))
+    return items
 
 def update_image():
     output_canvas.delete("all")
     animated_items.clear()
-    
+    static_images.clear()
+
     text = entry.get().lower()
     words = text.split()
     
-    items = []  # list of tuples: ("letter"/"gif", content)
+    # Build items per word
+    word_items_list = [create_item_for_word(word) for word in words]
 
-    # Process each word
-    for word in words:
-        gif_path_word = os.path.join(gif_folder, f"{word}.gif")
-        if os.path.exists(gif_path_word):
-            # GIF exists for the word
-            im = Image.open(gif_path_word)
-            frames = [ImageTk.PhotoImage(frame.resize(
-                (int(frame.width * (letter_size / frame.height)), letter_size), Image.ANTIALIAS)) 
-                      for frame in ImageSequence.Iterator(im)]
-            items.append(("gif", frames))
-        else:
-            # Check each letter
-            for ch in word:
-                gif_path_letter = os.path.join(gif_folder, f"{ch}.gif")
-                if os.path.exists(gif_path_letter):
-                    im = Image.open(gif_path_letter)
-                    frames = [ImageTk.PhotoImage(frame.resize(
-                        (int(frame.width * (letter_size / frame.height)), letter_size), Image.ANTIALIAS)) 
-                              for frame in ImageSequence.Iterator(im)]
-                    items.append(("gif", frames))
-                else:
-                    # No GIF: show letter
-                    items.append(("letter", ch.upper()))
-        # Add space after word
-        items.append(("letter", " "))
-
-    # Arrange items into rows
-    rows = []
-    for i in range(0, len(items), max_items_per_row):
-        rows.append(items[i:i+max_items_per_row])
-
-    # Display items on canvas
+    # Display with row wrapping
     y_offset = 0
-    for row in rows:
-        x_offset = 0
-        max_height = 0
-        for item_type, content in row:
-            if item_type == "letter":
-                output_canvas.create_text(x_offset + letter_size//2, y_offset + letter_size//2,
-                                          text=content, font=("Arial", 32))
-                x_offset += letter_size + 10
-                max_height = max(max_height, letter_size)
-            elif item_type == "gif":
+    x_offset = 0
+    max_height_in_row = 0
+
+    for word_items in word_items_list:
+        # Calculate total width of the word
+        word_width = 0
+        for item_type, content in word_items:
+            if item_type == "gif":
+                word_width += content[0].width() + spacing
+            elif item_type == "image":
+                word_width += content.width() + spacing
+            elif item_type == "space":
+                word_width += item_size // 2 + spacing
+
+        # Move to next row if exceeds canvas width
+        if x_offset + word_width > canvas_width:
+            x_offset = 0
+            y_offset += max_height_in_row + spacing
+            max_height_in_row = 0
+
+        # Draw the word
+        word_max_height = 0
+        for item_type, content in word_items:
+            if item_type == "gif":
                 label = output_canvas.create_image(x_offset, y_offset, anchor=NW, image=content[0])
                 animated_items.append((label, content))
-                x_offset += content[0].width() + 10
-                max_height = max(max_height, content[0].height())
-        y_offset += max_height + 10
+                w = content[0].width()
+                h = content[0].height()
+            elif item_type == "image":
+                label = output_canvas.create_image(x_offset, y_offset, anchor=NW, image=content)
+                w = content.width()
+                h = content.height()
+            elif item_type == "space":
+                w = item_size // 2
+                h = 0
+            x_offset += w + spacing
+            word_max_height = max(word_max_height, h)
+
+        max_height_in_row = max(max_height_in_row, word_max_height)
 
     animate_items()
 
@@ -94,10 +121,7 @@ def animate_items():
         frame = frames.pop(0)
         output_canvas.itemconfig(label, image=frame)
         frames.append(frame)
-    root.after(150, animate_items)
-
-Button(left_frame, text="Convert to Sign", command=update_image, font=("Arial", 12)).pack(pady=10)
+    if animated_items:
+        root.after(150, animate_items)
 
 root.mainloop()
-
-
