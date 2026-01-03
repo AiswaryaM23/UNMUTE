@@ -1,127 +1,99 @@
 import os
 from tkinter import *
-from PIL import Image, ImageTk, ImageSequence
+from PIL import Image, ImageTk
 
-# Paths
-letter_folder = "assets/images"  # JPG letters
-word_folder = "gif"              # GIF words
-
-# GUI parameters
-item_size = 100  # size of letter/GIF
-spacing = 10     # space between letters/GIFs
-canvas_width = 900
+# ---------------- CONFIG ----------------
+IMAGE_DIR = "assets/images"
+ITEM_SIZE = 90
+SPACING = 10
+CANVAS_WIDTH = 900
+# ----------------------------------------
 
 root = Tk()
-root.title("Text → Sign Language")
-root.geometry("1200x500")
+root.title("Text to Sign Language")
+root.geometry("1200x520")
 
-# Left frame for text input
-left_frame = Frame(root, width=300, height=500)
-left_frame.pack(side=LEFT, fill=Y, padx=10, pady=10)
+# ---------- LEFT PANEL ----------
+left = Frame(root, width=300)
+left.pack(side=LEFT, fill=Y, padx=10)
 
-Label(left_frame, text="Enter text:", font=("Arial", 14)).pack(pady=10)
-entry = Entry(left_frame, font=("Arial", 16), width=20)
+Label(left, text="Enter Text", font=("Arial", 15)).pack(pady=15)
+entry = Entry(left, font=("Arial", 16), width=20)
 entry.pack(pady=10)
 
-Button(left_frame, text="Convert to Sign", font=("Arial", 12), command=lambda: update_image()).pack(pady=20)
+Button(left, text="Convert", font=("Arial", 13), command=lambda: convert()).pack(pady=20)
 
-# Right frame for output
-right_frame = Frame(root, width=canvas_width, height=500)
-right_frame.pack(side=RIGHT, fill=BOTH, expand=True, padx=10, pady=10)
-output_canvas = Canvas(right_frame, bg="white", width=canvas_width)
-output_canvas.pack(fill=BOTH, expand=True)
+# ---------- RIGHT PANEL ----------
+right = Frame(root)
+right.pack(side=RIGHT, fill=BOTH, expand=True)
 
-# References
-animated_items = []  # GIFs
-static_images = []   # JPG letters
+canvas = Canvas(right, bg="white", width=CANVAS_WIDTH)
+canvas.pack(fill=BOTH, expand=True)
 
-def create_item_for_word(word):
-    """Return list of items for a word (either GIF or letters)"""
-    items = []
-    word_path = os.path.join(word_folder, f"{word}.gif")
+image_refs = []
+
+# ---------- FUNCTIONS ----------
+
+def load_word(word):
+    """Return list of PhotoImages for a word"""
+    images = []
+
+    # 1️⃣ Full word image
+    word_path = os.path.join(IMAGE_DIR, f"{word}.jpg")
     if os.path.exists(word_path):
-        im = Image.open(word_path)
-        frames = [ImageTk.PhotoImage(frame.resize(
-            (int(frame.width * (item_size / frame.height)), item_size),
-            Image.Resampling.LANCZOS))
-                  for frame in ImageSequence.Iterator(im)]
-        items.append(("gif", frames))
-    else:
-        for ch in word:
-            letter_path = os.path.join(letter_folder, f"{ch}.jpg")
-            if os.path.exists(letter_path):
-                im = Image.open(letter_path)
-                im = im.resize((item_size, item_size), Image.Resampling.LANCZOS)
-                photo = ImageTk.PhotoImage(im)
-                static_images.append(photo)
-                items.append(("image", photo))
-            else:
-                print(f"No image for '{ch}' found in {letter_folder}")
-    # Add space after word
-    items.append(("space", None))
-    return items
+        img = Image.open(word_path).resize(
+            (ITEM_SIZE, ITEM_SIZE), Image.Resampling.LANCZOS
+        )
+        photo = ImageTk.PhotoImage(img)
+        image_refs.append(photo)
+        return [photo]
 
-def update_image():
-    output_canvas.delete("all")
-    animated_items.clear()
-    static_images.clear()
+    # 2️⃣ Letter images
+    for ch in word:
+        letter_path = os.path.join(IMAGE_DIR, f"{ch}.jpg")
+        if os.path.exists(letter_path):
+            img = Image.open(letter_path).resize(
+                (ITEM_SIZE, ITEM_SIZE), Image.Resampling.LANCZOS
+            )
+            photo = ImageTk.PhotoImage(img)
+            image_refs.append(photo)
+            images.append(photo)
+        else:
+            print(f"Missing image for letter: {ch}")
 
-    text = entry.get().lower()
+    return images
+
+
+def convert():
+    canvas.delete("all")
+    image_refs.clear()
+
+    text = entry.get().lower().strip()
     words = text.split()
-    
-    # Build items per word
-    word_items_list = [create_item_for_word(word) for word in words]
 
-    # Display with row wrapping
-    y_offset = 0
-    x_offset = 0
-    max_height_in_row = 0
+    x, y = 0, 0
+    row_height = 0
 
-    for word_items in word_items_list:
-        # Calculate total width of the word
-        word_width = 0
-        for item_type, content in word_items:
-            if item_type == "gif":
-                word_width += content[0].width() + spacing
-            elif item_type == "image":
-                word_width += content.width() + spacing
-            elif item_type == "space":
-                word_width += item_size // 2 + spacing
+    for word in words:
+        word_images = load_word(word)
 
-        # Move to next row if exceeds canvas width
-        if x_offset + word_width > canvas_width:
-            x_offset = 0
-            y_offset += max_height_in_row + spacing
-            max_height_in_row = 0
+        word_width = sum(img.width() + SPACING for img in word_images)
 
-        # Draw the word
-        word_max_height = 0
-        for item_type, content in word_items:
-            if item_type == "gif":
-                label = output_canvas.create_image(x_offset, y_offset, anchor=NW, image=content[0])
-                animated_items.append((label, content))
-                w = content[0].width()
-                h = content[0].height()
-            elif item_type == "image":
-                label = output_canvas.create_image(x_offset, y_offset, anchor=NW, image=content)
-                w = content.width()
-                h = content.height()
-            elif item_type == "space":
-                w = item_size // 2
-                h = 0
-            x_offset += w + spacing
-            word_max_height = max(word_max_height, h)
+        # Move to next row if word doesn't fit
+        if x + word_width > CANVAS_WIDTH:
+            x = 0
+            y += row_height + SPACING
+            row_height = 0
 
-        max_height_in_row = max(max_height_in_row, word_max_height)
+        # Draw images
+        for img in word_images:
+            canvas.create_image(x, y, anchor=NW, image=img)
+            x += img.width() + SPACING
+            row_height = max(row_height, img.height())
 
-    animate_items()
+        # Space after word
+        x += ITEM_SIZE // 3
 
-def animate_items():
-    for label, frames in animated_items:
-        frame = frames.pop(0)
-        output_canvas.itemconfig(label, image=frame)
-        frames.append(frame)
-    if animated_items:
-        root.after(150, animate_items)
-
+# ---------- START ----------
 root.mainloop()
+
