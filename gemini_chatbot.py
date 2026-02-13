@@ -1,6 +1,14 @@
 import os
 import google.generativeai as genai
 from typing import List, Dict
+from dotenv import load_dotenv
+import warnings
+
+# Suppress the FutureWarning about google.generativeai deprecation
+warnings.filterwarnings('ignore', category=FutureWarning, module='google.generativeai')
+
+# Load environment variables from .env file
+load_dotenv()
 
 class GeminiChatbot:
     def __init__(self, api_key: str = None):
@@ -16,7 +24,7 @@ class GeminiChatbot:
                 raise ValueError("API key must be provided or set in GEMINI_API_KEY environment variable")
         
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-pro')
+        self.model = genai.GenerativeModel('models/gemini-2.5-flash')
         self.chat = self.model.start_chat(history=[])
         self.conversation_history: List[Dict[str, str]] = []
     
@@ -32,6 +40,7 @@ class GeminiChatbot:
         """
         try:
             response = self.chat.send_message(message)
+            response_text = response.text
             
             # Store in conversation history
             self.conversation_history.append({
@@ -40,10 +49,10 @@ class GeminiChatbot:
             })
             self.conversation_history.append({
                 'role': 'assistant',
-                'content': response.text
+                'content': response_text
             })
             
-            return response.text
+            return response_text
         except Exception as e:
             return f"Error: {str(e)}"
     
