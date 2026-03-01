@@ -72,7 +72,13 @@ model_dict = pickle.load(open(MODEL_PATH, "rb"))
 ml_model = model_dict["model"]
 
 # ── MediaPipe ────────────────────────────────────────────────────────────────
-mp_hands = mp.solutions.hands
+try:
+    mp_hands = mp.solutions.hands
+except AttributeError:
+    raise RuntimeError(
+        "mediapipe.solutions not found. "
+        "Install a compatible version: pip install 'mediapipe>=0.10.5,<0.10.20'"
+    )
 
 # ── Chatbot (lazy-loaded so missing API key doesn't crash startup) ────────────
 _chatbot: GeminiChatbot | None = None
