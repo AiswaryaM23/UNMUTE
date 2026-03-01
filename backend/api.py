@@ -14,6 +14,7 @@ import os
 import base64
 import pickle
 import json
+import socket
 from pathlib import Path
 
 import cv2
@@ -39,6 +40,31 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── Startup banner ────────────────────────────────────────────────────────────
+@app.on_event("startup")
+async def print_network_info():
+    try:
+        # Get the local Wi-Fi / LAN IP (connects a UDP socket, never sends data)
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+    except Exception:
+        local_ip = "unknown"
+
+    sep = "=" * 54
+    print(f"\n{sep}")
+    print("  ASL Sign Language Backend  –  RUNNING")
+    print(sep)
+    print(f"  Local (this PC) : http://localhost:8000")
+    print(f"  Network (phone) : http://{local_ip}:8000")
+    print(f"  Health check    : http://{local_ip}:8000/health")
+    print(f"  API docs        : http://{local_ip}:8000/docs")
+    print(sep)
+    print("  Flutter app URL to set in Settings:")
+    print(f"    http://{local_ip}:8000")
+    print(f"{sep}\n")
 
 # ── Load ML model ────────────────────────────────────────────────────────────
 MODEL_PATH = BASE_DIR / "model" / "model.p"
