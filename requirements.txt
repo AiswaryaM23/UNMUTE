@@ -2,7 +2,7 @@
 numpy
 opencv-python
 opencv-contrib-python
-mediapipe>=0.10.5,<0.10.20
+mediapipe==0.10.14
 scikit-learn
 pillow
 
