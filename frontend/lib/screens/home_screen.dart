@@ -3,6 +3,7 @@ import 'asl_detector_screen.dart';
 import 'text_to_sign_screen.dart';
 import 'chatbot_screen.dart';
 import 'settings_screen.dart';
+import 'guidepage.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -14,7 +15,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF161B22),
         title: const Text(
-          'ASL Sign Language',
+          'Two Way Sign Language Detector',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -37,9 +38,10 @@ class HomeScreen extends StatelessWidget {
             const Text(
               'Choose a feature',
               style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600),
+                color: Colors.white70,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -50,8 +52,8 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   _FeatureCard(
                     icon: Icons.sign_language,
-                    label: 'ASL Detector',
-                    subtitle: 'Real-time letter & sentence detection',
+                    label: 'Sign Language Detection',
+                    subtitle: 'Real-time letters & words detection',
                     gradient: const [Color(0xFF1565C0), Color(0xFF42A5F5)],
                     onTap: () => Navigator.push(
                       context,
@@ -78,7 +80,17 @@ class HomeScreen extends StatelessWidget {
                       MaterialPageRoute(builder: (_) => const ChatbotScreen()),
                     ),
                   ),
-                  _InfoCard(),
+                  _FeatureCard(
+                    icon: Icons.menu_book,
+                    label: 'Guide',
+                    subtitle: 'Learn how to use the app',
+                    gradient: const [Color(0xFFEF6C00), Color(0xFFFFA726)],
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const GuidePage()),
+                    ),
+                  ),
+                  const _InfoCard(),
                 ],
               ),
             ),
@@ -118,7 +130,7 @@ class _FeatureCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: gradient.last.withValues(alpha: 0.4),
+              color: gradient.last.withOpacity(0.4),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -154,6 +166,8 @@ class _FeatureCard extends StatelessWidget {
 }
 
 class _InfoCard extends StatelessWidget {
+  const _InfoCard();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -172,11 +186,14 @@ class _InfoCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('How it works',
-                    style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold)),
+                Text(
+                  'How it works',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 SizedBox(height: 4),
                 Text(
                   'Backend runs on your PC.\nSet the IP in Settings.',
