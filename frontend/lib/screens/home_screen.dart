@@ -15,7 +15,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF161B22),
         title: const Text(
-          'Two Way Sign Language Detector',
+          'ASL DETECTOR',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -73,7 +73,7 @@ class HomeScreen extends StatelessWidget {
                   _FeatureCard(
                     icon: Icons.chat_bubble_outline,
                     label: 'AI Chatbot',
-                    subtitle: 'Chat with Gemini AI assistant',
+                    subtitle: 'Chat with Gemini',
                     gradient: const [Color(0xFF6A1B9A), Color(0xFFAB47BC)],
                     onTap: () => Navigator.push(
                       context,
@@ -83,14 +83,13 @@ class HomeScreen extends StatelessWidget {
                   _FeatureCard(
                     icon: Icons.menu_book,
                     label: 'Guide',
-                    subtitle: 'Learn how to use the app',
+                    subtitle: 'Learn basics',
                     gradient: const [Color(0xFFEF6C00), Color(0xFFFFA726)],
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const GuidePage()),
                     ),
                   ),
-                  const _InfoCard(),
                 ],
               ),
             ),
@@ -159,49 +158,6 @@ class _FeatureCard extends StatelessWidget {
               )
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white12),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Icon(Icons.info_outline, color: Colors.white54, size: 28),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'How it works',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Backend runs on your PC.\nSet the IP in Settings.',
-                  style: TextStyle(color: Colors.white38, fontSize: 11),
-                ),
-              ],
-            ),
-          ],
         ),
       ),
     );

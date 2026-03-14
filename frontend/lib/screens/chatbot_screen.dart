@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../services/ws_service.dart';
+import 'asl_detector_screen.dart'; // ✅ ADDED
 
 class _Message {
   final String text;
@@ -11,7 +12,6 @@ class _Message {
   _Message(this.text, {required this.isUser});
 }
 
-/// Gemini AI chatbot screen.
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key});
 
@@ -44,7 +44,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     final data = WsService.parseJson(raw);
     final response = data['response'] as String?;
     final error = data['error'] as String?;
+
     if (!mounted) return;
+
     setState(() {
       _loading = false;
       if (error != null) {
@@ -53,19 +55,38 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         _messages.add(_Message(response, isUser: false));
       }
     });
+
     _scrollToBottom();
   }
 
   void _send() {
     final text = _ctrl.text.trim();
     if (text.isEmpty || _loading) return;
+
     _ctrl.clear();
+
     setState(() {
       _messages.add(_Message(text, isUser: true));
       _loading = true;
     });
+
     _scrollToBottom();
     _ws.send(text);
+  }
+
+  // ✅ OPEN ASL DETECTOR
+  Future<void> _openAslDetector() async {
+    final detectedText = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AslDetectorScreen(),
+      ),
+    );
+
+    if (detectedText != null && detectedText.trim().isNotEmpty) {
+      _ctrl.text = detectedText;
+      _send();
+    }
   }
 
   void _clearChat() {
@@ -100,11 +121,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       backgroundColor: const Color(0xFF0D1117),
       appBar: AppBar(
         backgroundColor: const Color(0xFF161B22),
-        title: const Text('AI Chatbot', style: TextStyle(color: Colors.white)),
+        title:
+            const Text('AI Chatbot', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.white70),
+            icon: const Icon(Icons.delete_outline,
+                color: Colors.white70),
             tooltip: 'Clear chat',
             onPressed: _clearChat,
           ),
@@ -112,7 +135,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             padding: const EdgeInsets.only(right: 12),
             child: Icon(
               _wsConnected ? Icons.wifi : Icons.wifi_off,
-              color: _wsConnected ? Colors.greenAccent : Colors.redAccent,
+              color: _wsConnected
+                  ? Colors.greenAccent
+                  : Colors.redAccent,
               size: 20,
             ),
           ),
@@ -120,7 +145,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       ),
       body: Column(
         children: [
-          // ── Message list ────────────────────────────────────────────────
           Expanded(
             child: _messages.isEmpty
                 ? const _EmptyChat()
@@ -129,27 +153,32 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                     padding: const EdgeInsets.symmetric(
                         vertical: 12, horizontal: 10),
                     itemCount: _messages.length,
-                    itemBuilder: (ctx, i) => _ChatBubble(msg: _messages[i]),
+                    itemBuilder: (ctx, i) =>
+                        _ChatBubble(msg: _messages[i]),
                   ),
           ),
-
-          // ── Typing indicator ────────────────────────────────────────────
           if (_loading)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 6),
               child: Text('Gemini is thinking…',
-                  style: TextStyle(color: Colors.white38, fontSize: 13)),
+                  style: TextStyle(
+                      color: Colors.white38, fontSize: 13)),
             ),
 
-          // ── Input bar ───────────────────────────────────────────────────
-          _InputBar(ctrl: _ctrl, onSend: _send, loading: _loading),
+          // ✅ UPDATED INPUT BAR
+          _InputBar(
+            ctrl: _ctrl,
+            onSend: _send,
+            onCamera: _openAslDetector,
+            loading: _loading,
+          ),
         ],
       ),
     );
   }
 }
 
-// ── Sub-widgets ───────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
 
 class _EmptyChat extends StatelessWidget {
   const _EmptyChat();
@@ -160,10 +189,12 @@ class _EmptyChat extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.chat_bubble_outline, color: Colors.white24, size: 64),
+          Icon(Icons.chat_bubble_outline,
+              color: Colors.white24, size: 64),
           SizedBox(height: 16),
           Text('Start a conversation with Gemini AI',
-              style: TextStyle(color: Colors.white38, fontSize: 15)),
+              style:
+                  TextStyle(color: Colors.white38, fontSize: 15)),
         ],
       ),
     );
@@ -178,32 +209,42 @@ class _ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final isUser = msg.isUser;
     return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment:
+          isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(
+            horizontal: 14, vertical: 10),
         constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.78),
+            maxWidth:
+                MediaQuery.of(context).size.width * 0.78),
         decoration: BoxDecoration(
-          color: isUser ? const Color(0xFF1565C0) : const Color(0xFF1E1E2E),
+          color: isUser
+              ? const Color(0xFF1565C0)
+              : const Color(0xFF1E1E2E),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(14),
             topRight: const Radius.circular(14),
-            bottomLeft: Radius.circular(isUser ? 14 : 2),
-            bottomRight: Radius.circular(isUser ? 2 : 14),
+            bottomLeft:
+                Radius.circular(isUser ? 14 : 2),
+            bottomRight:
+                Radius.circular(isUser ? 2 : 14),
           ),
         ),
         child: isUser
             ? Text(msg.text,
-                style:
-                    const TextStyle(color: Colors.white, fontSize: 15))
+                style: const TextStyle(
+                    color: Colors.white, fontSize: 15))
             : MarkdownBody(
                 data: msg.text,
                 styleSheet: MarkdownStyleSheet(
-                  p: const TextStyle(color: Colors.white70, fontSize: 15),
+                  p: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 15),
                   code: const TextStyle(
                       color: Colors.greenAccent,
-                      backgroundColor: Colors.transparent,
+                      backgroundColor:
+                          Colors.transparent,
                       fontFamily: 'monospace'),
                 ),
               ),
@@ -215,10 +256,15 @@ class _ChatBubble extends StatelessWidget {
 class _InputBar extends StatelessWidget {
   final TextEditingController ctrl;
   final VoidCallback onSend;
+  final VoidCallback onCamera; // ✅ ADDED
   final bool loading;
 
-  const _InputBar(
-      {required this.ctrl, required this.onSend, required this.loading});
+  const _InputBar({
+    required this.ctrl,
+    required this.onSend,
+    required this.onCamera,
+    required this.loading,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -227,6 +273,18 @@ class _InputBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
       child: Row(
         children: [
+          // 📷 Camera button
+          CircleAvatar(
+            backgroundColor: const Color(0xFF0D1117),
+            child: IconButton(
+              icon: const Icon(Icons.camera_alt,
+                  color: Colors.white70),
+              onPressed: loading ? null : onCamera,
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
           Expanded(
             child: TextField(
               controller: ctrl,
@@ -236,25 +294,35 @@ class _InputBar extends StatelessWidget {
               onSubmitted: (_) => onSend(),
               decoration: InputDecoration(
                 hintText: 'Ask something…',
-                hintStyle: const TextStyle(color: Colors.white38),
+                hintStyle:
+                    const TextStyle(color: Colors.white38),
                 filled: true,
                 fillColor: const Color(0xFF0D1117),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 18, vertical: 12),
+                contentPadding:
+                    const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 12),
               ),
             ),
           ),
+
           const SizedBox(width: 8),
+
           CircleAvatar(
-            backgroundColor:
-                loading ? Colors.white12 : const Color(0xFF6A1B9A),
+            backgroundColor: loading
+                ? Colors.white12
+                : const Color(0xFF6A1B9A),
             child: IconButton(
-              icon: Icon(loading ? Icons.hourglass_empty : Icons.send,
-                  color: Colors.white, size: 20),
+              icon: Icon(
+                loading
+                    ? Icons.hourglass_empty
+                    : Icons.send,
+                color: Colors.white,
+                size: 20,
+              ),
               onPressed: loading ? null : onSend,
             ),
           ),
