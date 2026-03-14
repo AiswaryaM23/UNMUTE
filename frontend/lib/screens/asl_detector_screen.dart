@@ -321,7 +321,7 @@ class _SentencePanel extends StatelessWidget {
               _ActionBtn(
                   label: correcting ? "Correcting..." : "Auto Correct",
                   onTap: onAutoCorrect),
-              _ActionBtn(label: "Send", onTap: onSendToChatbot),
+              _ActionBtn(label: "To Chatbot", onTap: onSendToChatbot),
             ],
           )
         ],
