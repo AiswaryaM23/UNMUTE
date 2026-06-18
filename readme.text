@@ -1,14 +1,93 @@
-model_training.py --- use for model training with dataset(name os the dataset asl_dataset).
-prediction_training.py --- view the prediction of each letter.
-fine_turning_debugging,py --- use personal data input to improve the accuracy of the model by give me the model personal dataset.9
-venv ----- python virtual environment--- to locally install python packages
-data.pickel----data converting to binary computer understandable form
-model.p---- copy/trained model compressed like version/trained model is saved using this
-myreal---extra data pickle/extra data is added here after fine tuning
-collectfinetune---to collect user input data and converted to pickle
-image process-- dataset image to pickle
-inference--- trained model is displayed
-retrain mix--- collectfinetune pickle to dump to model/already trained model
-train_model2-- train model with dataset
-run--- predictingletters
-to add-- finetuneingdebugging
+# 🤟 Unmute
+
+### AI-Powered Bidirectional Sign Language Communication System
+
+Unmute is an AI-powered mobile application designed to facilitate seamless communication between deaf or speech-impaired individuals and the hearing community. The system integrates real-time Sign-to-Text translation, Text-to-Sign conversion, and conversational AI to provide an accessible and inclusive communication platform. By combining Computer Vision, Machine Learning, and Natural Language Processing, Unmute helps reduce communication barriers in educational, professional, and everyday environments.
+
+---
+
+## 🧠 AI & Machine Learning Concept
+
+* MediaPipe is used for real-time hand landmark detection and extraction of 21 hand keypoints.
+* A Random Forest classifier is trained to recognize American Sign Language (ASL) gestures.
+* Natural Language Processing techniques are applied for sentence formation and text refinement.
+* Gemini API enables intelligent chatbot interactions using text or recognized sign language input.
+
+---
+
+## ✨ Key Features
+
+* Real-time Sign-to-Text translation using Machine Learning.
+* Text-to-Sign conversion through ASL gesture image mapping.
+* AI-powered chatbot for intelligent conversational support.
+* Interactive ASL learning guide for users.
+* Cross-platform Flutter application with an accessible user interface.
+
+---
+
+## 🛠️ Technology Stack
+
+* Flutter
+* Python
+* MediaPipe
+* OpenCV
+* Scikit-Learn
+* Random Forest Classifier
+* Gemini API
+
+---
+
+## 📸 Application Screenshots
+
+### Home Screen
+
+*Add Screenshot Here*
+
+### Sign-to-Text Translation
+
+*Add Screenshot Here*
+
+### Text-to-Sign Conversion
+
+*Add Screenshot Here*
+
+### AI Chatbot Interface
+
+*Add Screenshot Here*
+
+---
+
+## ▶️ How to Run the Application
+
+Clone the repository, install the required Flutter dependencies, configure the Gemini API key, and run the application on an Android device or emulator using Flutter.
+
+---
+
+## 🎯 Learning Outcomes
+
+* Understanding real-time gesture recognition using Computer Vision.
+* Applying Machine Learning techniques for sign language classification.
+* Integrating Natural Language Processing and Conversational AI into mobile applications.
+* Developing cross-platform applications using Flutter.
+* Building assistive technologies that promote accessibility and inclusion.
+
+---
+
+## 🤝 Contribution
+
+This project was developed as part of an academic research initiative focused on creating an accessible communication platform for deaf and speech-impaired individuals. Contributions include system design, machine learning model development, Flutter application development, chatbot integration, testing, and documentation.
+
+---
+
+## 👤 Author
+
+**Aiswarya M**
+
+Department of Artificial Intelligence and Data Science
+SCMS School of Engineering and Technology
+
+---
+
+## 📄 License
+
+This project is developed for academic, research, and demonstration purposes only.
