@@ -1,21 +1,19 @@
-# 🤟 Unmute
-
-### AI-Powered Bidirectional Sign Language Communication System
+  Unmute
+ AI-Powered Bidirectional Sign Language Communication System
 
 Unmute is an AI-powered mobile application designed to facilitate seamless communication between deaf or speech-impaired individuals and the hearing community. The system integrates real-time Sign-to-Text translation, Text-to-Sign conversion, and conversational AI to provide an accessible and inclusive communication platform. By combining Computer Vision, Machine Learning, and Natural Language Processing, Unmute helps reduce communication barriers in educational, professional, and everyday environments.
 
----
 
-## 🧠 AI & Machine Learning Concept
+ 🧠 AI & Machine Learning Concept
 
 * MediaPipe is used for real-time hand landmark detection and extraction of 21 hand keypoints.
 * A Random Forest classifier is trained to recognize American Sign Language (ASL) gestures.
 * Natural Language Processing techniques are applied for sentence formation and text refinement.
 * Gemini API enables intelligent chatbot interactions using text or recognized sign language input.
 
----
 
-## ✨ Key Features
+
+✨ Key Features
 
 * Real-time Sign-to-Text translation using Machine Learning.
 * Text-to-Sign conversion through ASL gesture image mapping.
@@ -23,9 +21,9 @@ Unmute is an AI-powered mobile application designed to facilitate seamless commu
 * Interactive ASL learning guide for users.
 * Cross-platform Flutter application with an accessible user interface.
 
----
 
-## 🛠️ Technology Stack
+
+ 🛠️ Technology Stack
 
 * Flutter
 * Python
@@ -35,35 +33,17 @@ Unmute is an AI-powered mobile application designed to facilitate seamless commu
 * Random Forest Classifier
 * Gemini API
 
----
 
-## 📸 Application Screenshots
 
-### Home Screen
+ 
 
-*Add Screenshot Here*
-
-### Sign-to-Text Translation
-
-*Add Screenshot Here*
-
-### Text-to-Sign Conversion
-
-*Add Screenshot Here*
-
-### AI Chatbot Interface
-
-*Add Screenshot Here*
-
----
-
-## ▶️ How to Run the Application
+ ▶️ How to Run the Application
 
 Clone the repository, install the required Flutter dependencies, configure the Gemini API key, and run the application on an Android device or emulator using Flutter.
 
----
 
-## 🎯 Learning Outcomes
+
+🎯 Learning Outcomes
 
 * Understanding real-time gesture recognition using Computer Vision.
 * Applying Machine Learning techniques for sign language classification.
@@ -71,20 +51,18 @@ Clone the repository, install the required Flutter dependencies, configure the G
 * Developing cross-platform applications using Flutter.
 * Building assistive technologies that promote accessibility and inclusion.
 
----
 
-## 🤝 Contribution
+
+🤝 Contribution
 
 This project was developed as part of an academic research initiative focused on creating an accessible communication platform for deaf and speech-impaired individuals. Contributions include system design, machine learning model development, Flutter application development, chatbot integration, testing, and documentation.
 
----
 
-## 👤 Author
+
+ 👤 Author
 
 **Aiswarya M**
 
-Department of Artificial Intelligence and Data Science
-SCMS School of Engineering and Technology
 
 ---
 
