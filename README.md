@@ -41,19 +41,30 @@ Unmute is an AI-powered mobile application designed to facilitate seamless commu
 
 ### Home Screen
 
-*Add Screenshot Here*
+<img width="250" height="400" alt="image" src="https://github.com/user-attachments/assets/4d599926-ff55-4cbc-affa-215e22961e10" />
+
+### Guide
+
+<p align="left">
+  <img src="https://github.com/user-attachments/assets/8824b643-824c-4850-954e-7b7077a2f6a5" width="250" />
+  &nbsp;&nbsp;&nbsp;
+  <img src="https://github.com/user-attachments/assets/8167731c-fbd7-4145-87ec-97cdedf8790f" width="250" />
+</p>
 
 ### Sign-to-Text Translation
 
-*Add Screenshot Here*
+<img width="250" height="400" alt="image" src="https://github.com/user-attachments/assets/8c451956-bd03-4410-bb0f-b75eb33c3fb1" />
+
 
 ### Text-to-Sign Conversion
 
-*Add Screenshot Here*
+<img width="250" height="400" alt="image" src="https://github.com/user-attachments/assets/38948df6-cce3-4363-bf95-dd0d7a14a372" />
+
 
 ### AI Chatbot Interface
 
-*Add Screenshot Here*
+<img width="250" height="400" alt="image" src="https://github.com/user-attachments/assets/1c2e63e2-9435-4535-b744-ef632463c682" />
+
 
 ---
 
@@ -81,9 +92,9 @@ Unmute is an AI-powered mobile application designed to facilitate seamless commu
 
 | Team Member | Contributions |
 |-------------|------------------|
-| Aiswarya M | ML Model Development, Sign-to-Text Implementation, Chatbot Integration |
-| Arpitha Mariya Joseph | ML Model Development, Text-to-Sign Implementation, Chatbot Integration |
-| Faseela Rahmath | Frontend Development, UI Design, Testing |
+| Aiswarya M | ML Model Development, Model Validation, Sign-to-Text Implementation |
+| Arpitha Mariya Joseph | ML Model Development, Text-to-Sign Implementation, Fine-Tuning |
+| Faseela Rahmath | Frontend Development, UI Design, Test Case Design and Execution |
 | Devi Subash | Backend Development, API Integration, System Connectivity And Deployment|
 
 
