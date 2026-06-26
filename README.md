@@ -100,9 +100,6 @@ Unmute is an AI-powered mobile application designed to facilitate seamless commu
 
 ---
 
-## 👤 Author
-
-**Aiswarya M**
 
 
 
